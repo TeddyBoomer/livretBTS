@@ -45,4 +45,4 @@ Tenter d'intégrer des données de 1ere année;
 Gestion des remplacements de collègues (multiligne pour une même matière)…
 Adapater à d'autres filières
 
-![résultat d'un traitement](eleve test.png)
+![résultat d'un traitement](eleve_test.png "illustration élève de test")
