@@ -3,7 +3,7 @@ depuis l'extraction pronote, produire les graphiques des livrets en BTS + format
 
 1. extraire la liste des élèves de pronote vers un fichier tableur `eleves.ods`.
 
-    - Y laisser le champs de date de naissance (utile ensuite).
+    - Y laisser les 2 champs: Nom  et date de naissance (utile ensuite).
     - une classe par onglet, exemples de nom: `SIO2`, `SIO2alt`
 	
 2. appliquer le script `prepa4pronote.py`: 
