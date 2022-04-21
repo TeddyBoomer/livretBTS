@@ -1,0 +1,29 @@
+{"SIO":
+ {"disciplines": ["CULTURE GENE.ET EXPR",
+		  "ANGLAIS LV1",
+		  "MATHS POUR INFORMATQ",
+		  "CULT.ECO JUR. MANAG.",
+		  "CULT.ECO.JUR.MAN.AP.",
+		  "bloc 1",
+		  "bloc 2",
+		  "bloc 3",
+		  "AT. PROFESSIONNALIS.",
+		  "LV2",
+		  "MATHS APPROF.",
+		  "PARC. CERTIF. COMPL."],
+  "disc_titles": ["Culture générale et expression",
+		  "Expression et communication\nen langue anglaise",
+		  "Mathématiques pour l’informatique",
+		  "Culture économique, juridique et managériale",
+		  "Culture économique, juridique\net managériale appliquée",
+		  "Bloc 1 : Support et mise à disposition\nde services informatiques",
+		  "Bloc 2 : option SISR / SLAM",
+		  "Bloc 3 : Cybersécurite\ndes services informatiques",
+		  "Ateliers de professionnalisation",
+		  "Langue vivante 2",
+		  "Mathématiques approfondies",
+		  "Parcours de certification complémentaire"],
+  "to_drop": ["AT. PROFESSION.", "CYBER.SERV.INF."]
+ }
+
+}
