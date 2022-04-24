@@ -24,6 +24,21 @@
 		  "Mathématiques approfondies",
 		  "Parcours de certification complémentaire"],
   "to_drop": ["AT. PROFESSION.", "CYBER.SERV.INF."]
+ },
+ "NDRC":
+ {"disciplines": ["CULTURE GENE.ET EXPR",
+		   "ANGLAIS LV1",
+		   "CULT.ECO JUR. MANAG.",
+		   "NEGOCIATION-VENTE - bloc 1",
+		   "DIGITALISATION - bloc 2",
+		   "ANIMATION RESEAUX - bloc 3"],
+  "disc_titles": ["Culture générale et expression",
+		   "Communication en langue vivante étrangère 1",
+		   "Culture économique, juridique et managériale",
+		   "Bloc 1 Relation client et négociation vente",
+		   "Bloc 2 Relation client à distance et digitalisation",
+		   "Bloc 3 Relation client et animation de réseaux",
+		   "Communication en langue vivante étrangère 2"],
+  "to_drop": ["DIGITALISATION", "NEGOCIATION-VENTE"]
  }
-
 }

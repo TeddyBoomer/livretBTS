@@ -1,6 +1,6 @@
 # Author: Boris Mauricette <teddy_boomer@yahoo.fr>
 # License: GNU GPL v3
-# v0.1
+# v0.2
 
 import pandas as pd
 import tkinter as tk
@@ -59,6 +59,7 @@ def get_title(e):
 
 # astuce ordinale pour toujours ordonner les matières selon leur position dans
 # disciplines
+# à envisager sur MultiIndex pour NDRC disc×semestre
 ORDRE = dict((e,i+1) for i,e in enumerate(disciplines))
 def get_ordre(e):
     """capturer l'index précis puis le vrai titre associé
@@ -89,17 +90,15 @@ def makeLivret(F, eleve, fichier_tableur, logfile, bts='SIO'):
         df = pd.read_excel(fichier_tableur, sheet_name=eleve)
         # 2 rows à supprimer en 2e année:
         DROP = matieresData["to_drop"] # ["AT. PROFESSION.", "CYBER.SERV.INF."]
-        LINES = [ i for i,e in df.iterrows() if e['Disciplines'] in DROP]
-        df = df.drop(LINES)
         
         # dfe2: dataframe eleve 2e année
         # données pivotées
         dfe2 = df.pivot(index='Disciplines', columns='Notation',
-                        values='Moy Eleve')
+                        values='Moy Eleve').drop(DROP, axis=0)
         dfc = df.pivot(index='Disciplines', columns='Notation',
-                       values='Moy Classe')      
+                       values='Moy Classe').drop(DROP, axis=0)      
         dfa = df.pivot(index='Disciplines', columns='Notation',
-                       values='Appréciations des professeurs')
+                       values='Appréciations des professeurs').drop(DROP, axis=0)
 
         # matieres du graphique
         matieres = [ e for e in dfa.index if is_toplot(e)]
