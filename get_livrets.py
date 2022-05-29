@@ -13,13 +13,14 @@ from functools import reduce
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_area_auto_adjustable
 import json
+import numpy as np
 
 # script d'extraction des moyennes élève sio2 pour:
 #  - construire le graphe
 #  - reformer les résultats vers le modèle académique
 # distribué en l'état; assurez-vous qu'il fait ce que vous attendez!
 
-elevesFile = askopenfilename(initialdir=os.environ['HOME'],
+elevesFile = askopenfilename(initialdir="", # os.environ['HOME']
                              title="Fichier listing élèves 2e année",
                              filetypes=[("ODS", "*.ods")])
 eleves = pd.read_excel(elevesFile, engine="odf",
@@ -94,7 +95,7 @@ def makeLivret(F, eleve, fichier_tableur, logfile, bts='SIO'):
         # dfe2: dataframe eleve 2e année
         # données pivotées
         dfe2 = df.pivot(index='Disciplines', columns='Notation',
-                        values='Moy Eleve').drop(DROP, axis=0)
+                        values='Moy Eleve').drop(DROP, axis=0).replace(to_replace=['Abs'], value=np.NaN)
         dfc = df.pivot(index='Disciplines', columns='Notation',
                        values='Moy Classe').drop(DROP, axis=0)      
         dfa = df.pivot(index='Disciplines', columns='Notation',
@@ -131,6 +132,9 @@ def makeLivret(F, eleve, fichier_tableur, logfile, bts='SIO'):
         print(f"{eleve} en erreur", file=logfile)
     except KeyError:
         print(f"{eleve} en erreur - clé manquante", file=logfile)
+    except TypeError:
+        print(f"{eleve} en erreur - type error", file=logfile)
+
 
 # Traitement graphique d'une dataFrame
 def makeGraphique(dfe2, dfc, eleve, matieres, matieresTitres,
@@ -148,7 +152,7 @@ def makeGraphique(dfe2, dfc, eleve, matieres, matieresTitres,
     dir: dossier d'enregistrement des images
     bts: filière (seulement 'SIO' pour l'instant)
     """
-    me = dfe2.get('Année').fillna(value=0).filter(items=matieres)
+    me = dfe2.get('Année').filter(items=matieres) # .fillna(value=0)
     mc = dfc.get('Année').fillna(value=10).filter(items=matieres)
     profil = (me.div(mc)*10).round().reindex(mat_ordered).rename(index=matieresTitres)
     plt.figure(figsize=(8,9))
@@ -163,7 +167,9 @@ def makeGraphique(dfe2, dfc, eleve, matieres, matieresTitres,
     make_axes_area_auto_adjustable(ax)
     # plt.show()
     plt.savefig(os.path.join(dir, f"{eleve}.png"))
+    plt.close()
 
+    
 for s in eleves: # onglets
     print(s)
     outdir = os.path.join(os.path.dirname(elevesFile), f"export_{s}")
@@ -184,6 +190,7 @@ for s in eleves: # onglets
                 df.to_excel(writer, sheet_name=nom)
                 # reste du traitement
                 makeLivret(writer, nom, fichier_tableur, LOG)
-        LOG.close()
+        
     else:
         print(f"pas de données pronote pour l'onglet **{s}**")
+    LOG.close()
