@@ -33,11 +33,11 @@ des cases au modèle proposé par l'EN.
 
 ## dépendances
 
-Ces scripts dépendent des modules `pandas`, `matplotlib`, `XslxWriter`
+Ces scripts dépendent des modules `pandas`, `numpy`, `matplotlib`, `XslxWriter`
 
 pour les installer, dans un terminal, saisir:
 
-    pip install pandas, matplotlib, XslxWriter
+    pip install pandas, numpy, matplotlib, XslxWriter
 
 ## TODO
 

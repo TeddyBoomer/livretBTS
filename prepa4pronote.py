@@ -9,7 +9,7 @@ from tkinter.filedialog import askopenfilename
 
 # appliquer à un fichier listing d'élèves type eleves.ods
 # mettre la nature du bts dans le nom de chaque onglet - ex: SIO2, SIO2alt
-elevesFile = askopenfilename(initialdir=os.environ['HOME'],
+elevesFile = askopenfilename(initialdir="", #os.environ['HOME']
                              title="Fichier listing élèves 2e année",
                              filetypes=[("ODS", "*.ods")])
 eleves = pd.read_excel(elevesFile, engine="odf", sheet_name=None,
@@ -20,7 +20,7 @@ for s in eleves: # parcours des onglets
         os.mkdir(outdir)
     except FileExistsError:
         pass
-    with pd.ExcelWriter(os.path.join(outdir, 'eleves2_pronote.xlsx'),
+    with pd.ExcelWriter(os.path.join(outdir, f"eleves_{s}_pronote.xlsx"),
                         engine='xlsxwriter',
                         datetime_format='dd/mm/yyyy') as writer:
         # engine_kwargs={'options': {'default_date_format': 'dd/mm/yyyy'}}

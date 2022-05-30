@@ -1,6 +1,6 @@
 # Author: Boris Mauricette <teddy_boomer@yahoo.fr>
 # License: GNU GPL v3
-# v0.2
+# v0.3
 
 import pandas as pd
 import tkinter as tk
@@ -173,7 +173,7 @@ def makeGraphique(dfe2, dfc, eleve, matieres, matieresTitres,
 for s in eleves: # onglets
     print(s)
     outdir = os.path.join(os.path.dirname(elevesFile), f"export_{s}")
-    fichier_tableur = os.path.join(outdir, "eleves2_pronote.xlsx")
+    fichier_tableur = os.path.join(outdir, f"eleves_{s}_pronote.xlsx")
     sortie = os.path.join(outdir, "livrets.xlsx")
     log = os.path.join(outdir,
                    f"log_livrets-{time.strftime('%d%m%Y-%H-%M-%S')}.log")
@@ -185,6 +185,8 @@ for s in eleves: # onglets
             for e in eleves[s].iterrows(): # e[0]: index, e[1] row
                 nom = e[1]['Élève']
                 print(f"traitement {nom}:", end="", file=LOG)
+                # affichage d'avancement du traitement
+                print(".", end="")
                 # nom et date naissance sur les 2 1eres lignes         
                 df = pd.DataFrame(e[1]).T
                 df.to_excel(writer, sheet_name=nom)
@@ -194,3 +196,4 @@ for s in eleves: # onglets
     else:
         print(f"pas de données pronote pour l'onglet **{s}**")
     LOG.close()
+    print("done")
