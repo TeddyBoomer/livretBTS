@@ -21,9 +21,11 @@ depuis l'extraction pronote, produire les graphiques des livrets en BTS + format
    ainsi qu'un fichier tableur avec les données reformatées pour les cases du
    livret.
 
-**Attention**: Seules les données de 2e année sont donc traitées, il faut vous
-débrouillez pour intégrer ensuite celles de 1ere année puis ajuster le format
-des cases au modèle proposé par l'EN.
+**Attention**: Les données de 2e année sont donc traitées.
+
+On peut tenter d'ajouter un excel des extractions de 1ere année (même nom de
+fichier avec 1 au lieu de 2 dedans); il faut veillez à avoir des noms de
+matières cohérents (peu importe le nom du prof)
 
 ## fichiers
 
