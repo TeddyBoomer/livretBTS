@@ -23,6 +23,7 @@ import numpy as np
 elevesFile = askopenfilename(initialdir="", # os.environ['HOME']
                              title="Fichier listing élèves 2e année",
                              filetypes=[("ODS", "*.ods")])
+
 eleves = pd.read_excel(elevesFile, engine="odf",
                        parse_dates=[1], sheet_name=None)
 
@@ -74,13 +75,15 @@ notations = ["Sem1", "Sem2", "Année"]
 # ['Disciplines', 'Notation', 'Rang', 'Moy Eleve', 'Moy Classe', '<8',
 #       'Entre 8 et 12', '>=12', 'Appréciations des professeurs']
 
-def makeLivret(F, eleve, fichier_tableur, logfile, bts='SIO'):
+def makeLivret(F, eleve, f2annee, f1annee, logfile, bts='SIO'):
     """créer le graphe et la feuille de tableur pour eleve
 
     Paramètres:
     -----------
     F: writer xlsx
     eleve: nom complet de l'élève 'NOM Prénom' extrait de pronote
+    fichier_tableur: nom du tableur des données de 2e année
+    f1annne: nom du tableur des données de 1ere année
     logfile: buffer d'enregistrement de la trace
 
     actions:
@@ -88,18 +91,34 @@ def makeLivret(F, eleve, fichier_tableur, logfile, bts='SIO'):
     un graphe eleve.png ajouté dans le dossier
     """
     try:
-        df = pd.read_excel(fichier_tableur, sheet_name=eleve)
+        df = pd.read_excel(f2annee, sheet_name=eleve)
         # 2 rows à supprimer en 2e année:
         DROP = matieresData["to_drop"] # ["AT. PROFESSION.", "CYBER.SERV.INF."]
         
         # dfe2: dataframe eleve 2e année
         # données pivotées
         dfe2 = df.pivot(index='Disciplines', columns='Notation',
-                        values='Moy Eleve').drop(DROP, axis=0).replace(to_replace=['Abs'], value=np.NaN)
+                        values='Moy Eleve').drop(DROP, axis=0, errors='ignore').replace(to_replace=['Abs'], value=np.NaN)
         dfc = df.pivot(index='Disciplines', columns='Notation',
-                       values='Moy Classe').drop(DROP, axis=0)      
+                       values='Moy Classe').drop(DROP, axis=0, errors='ignore')      
         dfa = df.pivot(index='Disciplines', columns='Notation',
-                       values='Appréciations des professeurs').drop(DROP, axis=0)
+                       values='Appréciations des professeurs').drop(DROP, axis=0, errors='ignore')
+
+        # dfe1: dataframe eleve 1ere année
+        if f1annee:
+            if (eleve in f1annee.sheet_names): # l'onglet existe pour cet eleve en 1ere annee
+                df1 = pd.read_excel(f1annee, sheet_name=eleve)
+                dfe1 = df1.pivot(index='Disciplines', columns='Notation',
+                                 values='Moy Eleve').drop(DROP, axis=0, errors='ignore').replace(to_replace=['Abs', 'N.Rdu'], value=np.NaN)
+                matFull1a = [ e for e in dfe1.index if is_discipline(e)]
+                full2title1a = dict([(e, get_title(e)) for e in matFull1a])
+                # idem full matieres
+                prnf_o1a = sorted([(e, get_ordre(e)) for e in matFull1a], key=lambda x: x[1])
+                prnf1a = list(zip(*prnf_o1a))[0]
+            else:
+                dfe1 = None
+        else:
+            dfe1 = None    
 
         # matieres du graphique
         matieres = [ e for e in dfa.index if is_toplot(e)]
@@ -121,9 +140,32 @@ def makeLivret(F, eleve, fichier_tableur, logfile, bts='SIO'):
         dfe2 = dfe2.reindex(notations + ['Appréciations des professeur(e)s'],
                             axis=1)
 
-        # export de la feuille de tableur    
+        # export de la feuille de tableur   
         livret = dfe2.loc[matFull].reindex(prnf).rename(index=full2title)
-        livret.to_excel(F, sheet_name=eleve, startrow=3)
+        # ajout d'un niveau - src: https://stackoverflow.com/questions/40225683/how-to-simply-add-a-column-level-to-a-pandas-dataframe
+        livret.columns = pd.MultiIndex.from_product([['2A'], livret.columns])
+        # tentative d'insertion données de 1ere année
+        try:
+            dfe1 = dfe1.reindex(notations, axis=1)
+            l1 = dfe1.loc[matFull1a].reindex(prnf1a).rename(index=full2title1a)
+            l1.columns = pd.MultiIndex.from_product([['1A'], l1.columns])
+            L = pd.concat([l1, livret], axis=1)
+            L = L.reindex(disc_titles)
+            L["1A"].to_excel(F, sheet_name=eleve, startrow=3, index=False)
+            L["2A"].to_excel(F, sheet_name=eleve, startrow=3, startcol=3)
+            # for column in L:
+            #     column_width = max(livret[column].astype(str).map(len).max(), len(column)) 
+            #     col_idx = livret.columns.get_loc(column)
+            #     # décalage colonne relativement au multi-index
+            #     F.sheets[eleve].set_column(col_idx, col_idx, column_width)
+        except AttributeError:
+            print(f"{eleve} absent de la 1ere année")
+            livret.to_excel(F, sheet_name=eleve, startrow=3, startcol=3)
+            for column in livret:
+                column_width = max(livret[column].astype(str).map(len).max(), len(column)) 
+                col_idx = livret.columns.get_loc(column)
+                # décalage colonne relativement au multi-index
+                F.sheets[eleve].set_column(col_idx, col_idx, column_width)
 
         # construction du graphique - moyennes élève me, moyennes classe mc
         makeGraphique(dfe2, dfc, eleve, matieres, mat2title, prn, outdir, "SIO")
@@ -134,6 +176,8 @@ def makeLivret(F, eleve, fichier_tableur, logfile, bts='SIO'):
         print(f"{eleve} en erreur - clé manquante", file=logfile)
     except TypeError:
         print(f"{eleve} en erreur - type error", file=logfile)
+    except pd.errors.InvalidIndexError:
+        print(f"{eleve} erreur sur le réindexage", file=logfile)
 
 
 # Traitement graphique d'une dataFrame
@@ -172,13 +216,20 @@ def makeGraphique(dfe2, dfc, eleve, matieres, matieresTitres,
     
 for s in eleves: # onglets
     print(s)
-    outdir = os.path.join(os.path.dirname(elevesFile), f"export_{s}")
+    outdir = os.path.abspath(os.path.join(os.path.dirname(elevesFile), f"export_{s}"))
     fichier_tableur = os.path.join(outdir, f"eleves_{s}_pronote.xlsx")
+    # reconnaissance rapide du fichier de 1ere année
+    s1 = s.replace("2", "1")
+    f1annee = os.path.join(outdir, f"eleves_{s1}_pronote.xlsx")
+    
     sortie = os.path.join(outdir, "livrets.xlsx")
     log = os.path.join(outdir,
                    f"log_livrets-{time.strftime('%d%m%Y-%H-%M-%S')}.log")
     LOG = open(log, "w")
     if os.path.exists(fichier_tableur):
+        # in memory des fichiers excel
+        f2a = pd.ExcelFile(fichier_tableur)
+        f1a = pd.ExcelFile(f1annee) if os.path.exists(f1annee) else None
         with pd.ExcelWriter(sortie, engine='xlsxwriter',
                             datetime_format='dd/mm/yyyy') as writer:
             # engine_kwargs={'options': {'datetime_format': 'dd/mm/yyyy'}}
@@ -189,10 +240,9 @@ for s in eleves: # onglets
                 print(".", end="")
                 # nom et date naissance sur les 2 1eres lignes         
                 df = pd.DataFrame(e[1]).T
-                df.to_excel(writer, sheet_name=nom)
+                df.to_excel(writer, sheet_name=nom, index=False)
                 # reste du traitement
-                makeLivret(writer, nom, fichier_tableur, LOG)
-        
+                makeLivret(writer, nom, f2a, f1a, LOG)
     else:
         print(f"pas de données pronote pour l'onglet **{s}**")
     LOG.close()
